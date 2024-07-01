@@ -9,6 +9,7 @@ import 'package:whatsapp_status_saver/flow/home_page/widgets/images_part/images_
 import 'package:whatsapp_status_saver/flow/home_page/widgets/videos_part/videos_part.dart';
 import 'package:whatsapp_status_saver/flow/video_view_page/view/video_view_page.dart';
 import 'package:whatsapp_status_saver/util/app_data.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -21,7 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {        
     final bloc = context.read<HomePageBloc>();
     bloc.add(HomePageInitialEvent());
     return DefaultTabController(
@@ -38,22 +39,32 @@ class _HomePageState extends State<HomePage> {
                   headerSliverBuilder: (context, innerBoxIsScrolled) {
                     return [
                       SliverAppBar(
-                        title: const Text('Status Saver'),
+                        title: Text(AppLocalizations.of(context)?.statusSaver ?? "Status Saver" ),
                         floating: true,
                         pinned: true,
                         toolbarHeight: kToolbarHeight,
-                        bottom: const TabBar(
+                        bottom: TabBar(
                           dividerHeight: kToolbarHeight,
                           tabs: [
                             Tab(
-                              child: Text('Images'),
+                              child: Text(AppLocalizations.of(context)?.images ?? 'Images'),
                             ),
                             Tab(
-                              child: Text('Videos'),
+                              child: Text(AppLocalizations.of(context)?.videos ?? 'Videos'),
                             ),
                           ],
                         ),
                         actions: [
+                          InkWell(
+                            onTap: () async {
+                              bloc.add(HomePageInitialEvent());
+                            },
+                            borderRadius: BorderRadius.circular(50.0),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(Icons.refresh),
+                            ),
+                          ),
                           InkWell(
                             onTap: () async {
                               await Share.share(

@@ -44,7 +44,8 @@ class _VideoViewPageState extends State<VideoViewPage> {
                Navigator.of(context).pop();
             }, iconData: Icons.download, title: 'Save'),
           ];
-        },        
+        },  
+                            
         zoomAndPan: true,
         autoInitialize: true,
         autoPlay: true,
