@@ -50,6 +50,7 @@ dependencies:
   intl: any
   google_mobile_ads: ^5.1.0
   connectivity_plus: ^6.0.3
+  device_info_plus: ^10.1.0
   # share_plus: ^8.0.3
 
 dev_dependencies:

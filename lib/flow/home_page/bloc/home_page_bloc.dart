@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,11 +16,17 @@ import 'package:whatsapp_status_saver/util/connectivity_manager.dart';
 class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
   static const _statusDirectoryPath =
       '/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses';
+  static const _statusDirectoryPathLowerVersions = '/storage/emulated/0/WhatsApp/Media/.Statuses';
   static const _businessStatusDirctoryPath =
       '/storage/emulated/0/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/.Statuses';
+  static const _businessStatusDirctoryPathLowerVersion =
+      '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
   // Statuses Directory
   Directory simpleDirectory = Directory(_statusDirectoryPath);
   Directory businessDirectory = Directory(_businessStatusDirctoryPath);
+  Directory simpleDirectoryLowerVersion = Directory(_statusDirectoryPathLowerVersions);
+  Directory businessDirectoryLowerVersion = Directory(_businessStatusDirctoryPathLowerVersion);
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   // Images & Videos Paths List
   List<FileSystemEntity> statusesList = [];
   List<String> imagesList = [];
@@ -32,23 +39,41 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
     on<HomePageVideoNavigateEvent>(_handleNavigationEvent);
   }
 
+  Future<Directory> getSuitableSimpleDirectory() async{
+    var androidInfo = await deviceInfo.androidInfo;
+    var release = androidInfo.version.release;    
+    if(release == '11' || release == '12' || release == '13' || release == '14'){
+      return simpleDirectory;
+    }
+    return simpleDirectoryLowerVersion;
+  }
+
+  Future<Directory> getSuitableBusinessDirectory() async{
+    var androidInfo = await deviceInfo.androidInfo;
+    var release = androidInfo.version.release;    
+    if(release == '11' || release == '12' || release == '13' || release == '14'){
+      return businessDirectory;
+    }
+    return businessDirectoryLowerVersion;
+  }
+
   FutureOr<void> _handleInitialEvent(
       HomePageInitialEvent event, Emitter<HomePageState> emit) async {        
         var isGranted = await Permission.manageExternalStorage.isGranted;
     if (isGranted) {
-      if (currentType == WhatsappTypes.simple) {
-        log('Simple');
-        if (simpleDirectory.existsSync()) {
-          statusesList = simpleDirectory.listSync().toList();
+      if (currentType == WhatsappTypes.simple) {  
+        Directory directory = await getSuitableSimpleDirectory();      
+        if (directory.existsSync()) {
+          statusesList = directory.listSync().toList();
         } else {
           statusesList = [];
           imagesList = [];
           videosList = [];
         }
-      } else {
-        log('Business');
-        if (businessDirectory.existsSync()) {
-          statusesList = businessDirectory.listSync().toList();
+      } else {        
+        Directory directory = await getSuitableBusinessDirectory();
+        if (directory.existsSync()) {
+          statusesList = directory.listSync().toList();
         } else {
           statusesList = [];
           imagesList = [];

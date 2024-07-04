@@ -23,20 +23,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
-  void initState() {    
-    super.initState();    
-  }
-  @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
     final bloc = context.read<HomePageBloc>();
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) async{      
-      var result = await Permission.storage.request();   
-      if(result == PermissionStatus.granted){        
-    bloc.add(HomePageInitialEvent());
-      }      
-    },);    
+    SchedulerBinding.instance.addPostFrameCallback(
+      (timeStamp) async {
+        var result = await Permission.storage.request();
+        if (result == PermissionStatus.granted) {
+          bloc.add(HomePageInitialEvent());
+        }
+      },
+    );
     return DefaultTabController(
       length: 2,
       initialIndex: 0,
