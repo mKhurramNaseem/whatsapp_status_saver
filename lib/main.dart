@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:whatsapp_status_saver/flow/home_page/bloc/home_page_bloc.dart';
 import 'package:whatsapp_status_saver/flow/home_page/view/home_page.dart';
 import 'package:whatsapp_status_saver/util/app_data.dart';
@@ -12,7 +13,9 @@ StreamController<ThemeMode> themeModeController = StreamController<ThemeMode>();
 var themeMode = ThemeMode.dark;
 var currentType = WhatsappTypes.simple;
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -38,6 +41,7 @@ class MainAppBody extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Demo',
             themeMode: snapshot.data,
+            debugShowCheckedModeBanner: false,
             darkTheme: AppTheme.darkTheme(),
             theme: AppTheme.lightTheme(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,

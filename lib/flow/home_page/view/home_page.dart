@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:whatsapp_status_saver/flow/home_page/bloc/home_page_bloc.dart';
 import 'package:whatsapp_status_saver/flow/home_page/bloc/home_page_events.dart';
@@ -21,10 +23,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   @override
-  Widget build(BuildContext context) {        
+  void initState() {    
+    super.initState();    
+  }
+  @override
+  Widget build(BuildContext context) {    
     final bloc = context.read<HomePageBloc>();
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) async{      
+      var result = await Permission.storage.request();   
+      if(result == PermissionStatus.granted){        
     bloc.add(HomePageInitialEvent());
+      }      
+    },);    
     return DefaultTabController(
       length: 2,
       initialIndex: 0,
@@ -39,7 +51,8 @@ class _HomePageState extends State<HomePage> {
                   headerSliverBuilder: (context, innerBoxIsScrolled) {
                     return [
                       SliverAppBar(
-                        title: Text(AppLocalizations.of(context)?.statusSaver ?? "Status Saver" ),
+                        title: Text(AppLocalizations.of(context)?.statusSaver ??
+                            "Status Saver"),
                         floating: true,
                         pinned: true,
                         toolbarHeight: kToolbarHeight,
@@ -47,10 +60,14 @@ class _HomePageState extends State<HomePage> {
                           dividerHeight: kToolbarHeight,
                           tabs: [
                             Tab(
-                              child: Text(AppLocalizations.of(context)?.images ?? 'Images'),
+                              child: Text(
+                                  AppLocalizations.of(context)?.images ??
+                                      'Images'),
                             ),
                             Tab(
-                              child: Text(AppLocalizations.of(context)?.videos ?? 'Videos'),
+                              child: Text(
+                                  AppLocalizations.of(context)?.videos ??
+                                      'Videos'),
                             ),
                           ],
                         ),
@@ -110,6 +127,25 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
+      );
+    } else if (state is ErrorState) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('No Internet'),
+            content: Text(state.message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Ok'),
+              ),
+            ],
+          );
+        },
       );
     }
   }

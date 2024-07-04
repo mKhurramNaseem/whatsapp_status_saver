@@ -10,6 +10,7 @@ import 'package:whatsapp_status_saver/flow/home_page/bloc/home_page_events.dart'
 import 'package:whatsapp_status_saver/flow/home_page/bloc/home_page_states.dart';
 import 'package:whatsapp_status_saver/main.dart';
 import 'package:whatsapp_status_saver/util/app_data.dart';
+import 'package:whatsapp_status_saver/util/connectivity_manager.dart';
 
 class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
   static const _statusDirectoryPath =
@@ -32,9 +33,9 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
   }
 
   FutureOr<void> _handleInitialEvent(
-      HomePageInitialEvent event, Emitter<HomePageState> emit) async {
-    var status = await Permission.manageExternalStorage.request();
-    if (status == PermissionStatus.granted) {
+      HomePageInitialEvent event, Emitter<HomePageState> emit) async {        
+        var isGranted = await Permission.manageExternalStorage.isGranted;
+    if (isGranted) {
       if (currentType == WhatsappTypes.simple) {
         log('Simple');
         if (simpleDirectory.existsSync()) {
@@ -87,14 +88,24 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
 
   FutureOr<void> _handleImageSaveEvent(
       HomePageImageSaveEvent event, Emitter<HomePageState> emit) async {
-    await ImageGallerySaver.saveFile(event.imagePath);
+        bool isConnected = await ConnectivityManager.isConnected();
+    if(isConnected){
+      await ImageGallerySaver.saveFile(event.imagePath);
     emit(SavedState(message: 'Image Saved'));
+    }else{
+      emit(ErrorState(message: 'Connect to Internet and Try Again!'));
+    }
   }
 
   FutureOr<void> _handleVideoSaveEvent(
       HomePageVideoSaveEvent event, Emitter<HomePageState> emit) async {
-    await ImageGallerySaver.saveFile(event.videoPath);
-    emit(SavedState(message: 'Video Saved'));
+    bool isConnected = await ConnectivityManager.isConnected();
+    if(isConnected){
+     await ImageGallerySaver.saveFile(event.videoPath);
+    emit(SavedState(message: 'Video Saved'));         
+    }else{
+      emit(ErrorState(message: 'Connect to Internet and Try Again!'));
+    }
   }
 
   FutureOr<void> _handleNavigationEvent(
@@ -105,4 +116,6 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
         await file.copy('${directory.path}${Platform.pathSeparator}.temp.mp4');
     emit(NavigateState(file: temp));
   }
+
+  
 }

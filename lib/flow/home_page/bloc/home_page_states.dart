@@ -27,3 +27,8 @@ class NavigateState extends HomePageState{
   final File file;
   NavigateState({required this.file});
 }
+
+class ErrorState extends HomePageState{
+  final String message;
+  ErrorState({required this.message});
+}

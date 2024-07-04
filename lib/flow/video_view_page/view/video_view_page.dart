@@ -28,7 +28,7 @@ class _VideoViewPageState extends State<VideoViewPage> {
   initialize() async {
     videoPlayerController = VideoPlayerController.file(widget.temp);
     chewieController = ChewieController(
-        videoPlayerController: videoPlayerController,
+        videoPlayerController: videoPlayerController,        
         additionalOptions: (context) {
           return [
             OptionItem(onTap: () async {
